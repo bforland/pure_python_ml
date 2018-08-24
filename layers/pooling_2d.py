@@ -23,6 +23,7 @@ class layer:
         self.pool_dim=int(pool_dim)
     # Checking the dimension TypeError
         return dim_check_1
+        
     def pool(self,A):
         vals=[]
         # Set the start index for i

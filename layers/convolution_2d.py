@@ -1,11 +1,12 @@
 import numpy
 
 class layer:
-    def __init__(self,filters,filter_d=2,stride=1,padding=0):
+    def __init__(self,filters,filter_d=2,stride=1,padding=0,input_layer=0):
         self.filters = filters
         self.filter_d = filter_d
         self.stride = stride
         self.padding = padding
+        self.input_layer = input_layer
 
     def convolution_2d(self,X):
 
@@ -47,12 +48,23 @@ class layer:
 
         return conv_X
 
-    def evaluate(self,data):
-        filters=[]
-        for i in range(self.filters):
-            filters.append(self.single_filter(data))
-        filters=numpy.array(filters)
-        return filters
+    def evaluate(self,data,input_layer=0):
+        if self.input_layer == 1:
+            filters=[]
+            for i in range(self.filters):
+                filters.append(self.single_filter(data))
+            filters=numpy.array(filters)
+            return filters
+        else:
+            maps=[]
+            for j in range(len(data)):
+                filters=[]
+                for i in range(self.filters):
+                    filters.append(self.single_filter(data))
+                filters=numpy.array(filters)
+                maps.append(filters)
+            maps=numpy.array(maps)
+            return(maps)
 
 if __name__ == '__main__':
     import numpy

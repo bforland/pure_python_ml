@@ -8,7 +8,7 @@ X = numpy.floor(10.0 * (numpy.random.rand(10,25,25)))
 print(numpy.shape(X))
 
 
-conv_1=convolution_2d.layer(10,filter_d=2,stride=1,padding=0)
+conv_1=convolution_2d.layer(10,filter_d=2,stride=1,padding=0,input_layer=1)
 output=conv_1.evaluate(X)
 print(numpy.shape(output))
 
