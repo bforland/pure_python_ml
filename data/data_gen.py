@@ -62,6 +62,6 @@ class ring_data:
 
             numpy.savez_compressed("test.npz",data=self.data)
 
-r=ring_data(1000,.75,1.0)
-r.get_data()
-r.save_data()
+#r=ring_data(1000,.75,1.0)
+#r.get_data()
+#r.save_data()
