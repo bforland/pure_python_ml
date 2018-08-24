@@ -1,8 +1,8 @@
 import numpy
 
 class layer:
-    def __init__(self,nodes,filter_d=2,stride=1,padding=0):
-        self.nodes = nodes
+    def __init__(self,filters,filter_d=2,stride=1,padding=0):
+        self.filters = filters
         self.filter_d = filter_d
         self.stride = stride
         self.padding = padding
@@ -37,18 +37,26 @@ class layer:
         #self.data=array
         return l
 
-    def evaluate(self,data):
+    def single_filter(self,data):
 
         conv_X=[]
-        print("test")
-        for i in range(len(X)):
-            conv_X.append(self.convolution_2d(X[i]))
+
+        for i in range(len(data)):
+            conv_X.append(self.convolution_2d(data[i]))
         conv_X=numpy.array(conv_X)
-        print(numpy.shape(conv_X))
+
         return conv_X
+
+    def evaluate(self,data):
+        filters=[]
+        for i in range(self.filters):
+            filters.append(self.single_filter(data))
+        filters=numpy.array(filters)
+        return filters
 
 if __name__ == '__main__':
     import numpy
     X = numpy.floor(10.0 * (numpy.random.rand(10,6,6)))
     conv_1=layer(10)
     output=conv_1.evaluate(X)
+    print(numpy.shape(output))
