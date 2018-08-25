@@ -17,3 +17,7 @@ output=sigmoid.evaluate(output)
 pool_1=pooling_2d.layer()
 output=pool_1.evaluate(output)
 print(numpy.shape(output))
+
+conv_2=convolution_2d.layer(10,filter_d=2,stride=1,padding=0)
+output=conv_2.evaluate(output)
+print(numpy.shape(output))
