@@ -1,4 +1,4 @@
 import numpy
 
-def evaluate(x, derivative=False):
-  return x*(1-x) if derivative else 1/(1+numpy.exp(-x))
+def evaluate(x):
+    return 0.5 * (numpy.tanh(x) + 1.0)
