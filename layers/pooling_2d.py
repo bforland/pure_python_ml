@@ -18,17 +18,16 @@ class layer:
 
     def check_dimensions(self,data):
         # Creating pool filter dimensions and checking to make sure they work
-        pool_dim = (np.float(np.shape(data[0][0])[0])-(np.float(self.filter)-np.float(self.stride)))/np.float(self.stride)
+        pool_dim = (np.float(np.shape(data)[0])-(np.float(self.filter)-np.float(self.stride)))/np.float(self.stride)
         dim_check_1 = (np.round(pool_dim)-np.round(pool_dim,1))
         self.pool_dim=int(pool_dim)
     # Checking the dimension TypeError
         return dim_check_1
-        
+
     def pool(self,A):
         vals=[]
         # Set the start index for i
         i = 0
-
         # Loop over all the entries of the matrix, modified by the pool filter
         while i < (len(A)-(self.filter-self.stride)):
 
@@ -47,19 +46,19 @@ class layer:
         # Reshape and print the new "Pool" matrix
         vals=np.reshape(np.array(vals),(np.int(self.pool_dim),np.int(self.pool_dim)))
         return vals
-
-    def single_filter(self,data):
-
-        pool_X=[]
-        for i in range(len(data)):
-            pool_X.append(self.pool(data[i]))
-        pool_X=np.array(pool_X)
-
-        return pool_X
+        
     def evaluate(self,data):
+        if self.check_dimensions(data[0]) == 0:
+            maps=[]
+            for i in range(len(data)):
+                maps.append(self.pool(data[i]))
+            maps=np.array(maps)
+            return maps
+        '''
         if self.check_dimensions(data) == 0:
             maps=[]
             for i in range(len(data)):
                 maps.append(self.single_filter(data[i]))
             maps=np.array(maps)
             return maps
+        '''

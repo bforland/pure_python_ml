@@ -1,12 +1,12 @@
 import numpy
 
 class layer:
-    def __init__(self,filters,filter_d=2,stride=1,padding=0,input_layer=0):
+    def __init__(self,filters,filter_d=2,stride=1,padding=0):
         self.filters = filters
         self.filter_d = filter_d
         self.stride = stride
         self.padding = padding
-        self.input_layer = input_layer
+        self.output_dim=0
 
     def convolution_2d(self,X):
 
@@ -31,44 +31,28 @@ class layer:
             for num2 in range(dim):
                 l.append(conv(X,W,num2,num1))
 
-        l=numpy.round(numpy.reshape(numpy.array(l),(dim,dim)),1)
+        l=numpy.reshape(numpy.array(l),(dim,dim))
+        self.output_dim=dim
         #print(numpy.shape(l))
         #class convolution_2d:
         #    def __init__(self,array,filter_dim_1,filter_dim_2):
         #self.data=array
         return l
 
-    def single_filter(self,data):
-
-        conv_X=[]
+    def single_filter(self,conv_X,data):
 
         for i in range(len(data)):
-            conv_X.append(self.convolution_2d(data[i]))
-        conv_X=numpy.array(conv_X)
-
+            conv_X=numpy.append(conv_X,self.convolution_2d(data[i]))
         return conv_X
 
-    def evaluate(self,data,input_layer=0):
-        if self.input_layer == 1:
-            filters=[]
-            for i in range(self.filters):
-                filters.append(self.single_filter(data))
-            filters=numpy.array(filters)
-            return filters
-        else:
-            maps=[]
-            for j in range(len(data)):
-                filters=[]
-                for i in range(self.filters):
-                    filters.append(self.single_filter(data))
-                filters=numpy.array(filters)
-                maps.append(filters)
-            maps=numpy.array(maps)
-            return(maps)
+    def evaluate(self,data):
+        conv_X=numpy.empty(0)
+        for i in range(self.filters):
+            conv_X=numpy.append(conv_X,self.single_filter(numpy.empty(0),data))
+        return numpy.reshape(conv_X,(self.filters*len(data),self.output_dim,self.output_dim))
 
 if __name__ == '__main__':
     import numpy
     X = numpy.floor(10.0 * (numpy.random.rand(10,6,6)))
     conv_1=layer(10)
     output=conv_1.evaluate(X)
-    print(numpy.shape(output))
