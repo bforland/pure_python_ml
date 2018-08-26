@@ -9,22 +9,30 @@ from activations import sigmoid
 
 
 numpy.random.seed(0)
-X = numpy.random.rand(2,25,25)
+X = numpy.random.rand(1,3,3)
 Y = numpy.array((0,1,1,0,1,0,0,1,1,0))
 print(numpy.shape(X))
 epochs=1
 for i in range(epochs):
     # Define the layers of the model
-    conv_1=convolution_2d.layer(10,filter_d=12,stride=2,padding=12)
+    conv_1=convolution_2d.layer(1,filter_d=2,stride=1,padding=0)
     output=conv_1.evaluate(X)
     print(numpy.shape(output))
 
+    dlds=log_loss.evaluate(0,output,derivative=1)
+
+    conv_bp_1=convolution_2d.layer(len(dlds),weights=dlds,filter_d=2,stride=1,padding=0)
+    final=conv_bp_1.evaluate(X)
+
+    print(final)
+
+    '''
     output=sigmoid.evaluate(output)
 
     pool_1=pooling_2d.layer()
     output=pool_1.evaluate(output)
     print(numpy.shape(output))
-    '''
+
     conv_2=convolution_2d.layer(10,filter_d=3,stride=1,padding=0)
     output=conv_2.evaluate(output)
     print(numpy.shape(output))
@@ -53,7 +61,7 @@ for i in range(epochs):
     print(numpy.shape(output))
 
     output=sigmoid.evaluate(output)
-    '''
+
     output=flatten.evaluate(output)
 
     dense_1=dense.layer(10)
@@ -66,4 +74,5 @@ for i in range(epochs):
 
     prediction=numpy.max(output)
 
-    print(log_loss.evaluate(Y,output))
+    print()
+    '''

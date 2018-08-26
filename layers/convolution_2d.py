@@ -1,11 +1,13 @@
 import numpy
+import types
 
 class layer:
-    def __init__(self,filters,filter_d=2,stride=1,padding=0):
+    def __init__(self,filters,weights=None,filter_d=2,stride=1,padding=0):
         self.filters = filters
         self.filter_d = filter_d
         self.stride = stride
         self.padding = padding
+        self.weights = weights
         self.output_dim=0
 
     def conv(self,data,W,p,q):
@@ -16,10 +18,14 @@ class layer:
 
         return val
 
-    def convolution_2d(self,X):
+    def generate_map(self,X,count):
 
-        W=numpy.random.rand(self.filter_d,self.filter_d)
+        if type(self.weights) == types.NoneType:
+            W=numpy.random.rand(self.filter_d,self.filter_d)
+        else:
+            W=self.weights[count]
         W=numpy.flip(numpy.flip(W,axis=0),axis=1)
+
         #print(X)
         dim=(numpy.shape(X)[0]-numpy.shape(W)[0])/self.stride+1
         #c=numpy.zeros((dim,dim))
@@ -43,7 +49,7 @@ class layer:
         padded_d=numpy.zeros((dims[0]+self.padding*2,dims[1]+self.padding*2))
         for i in range(len(data)):
             padded_d[(self.padding):(self.padding+dims[0]),(self.padding):(self.padding+dims[1])]=data[i]
-            conv_X=numpy.append(conv_X,self.convolution_2d(padded_d))
+            conv_X=numpy.append(conv_X,self.generate_map(padded_d,i))
             padded_d=padded_d*0.0
         return conv_X
 
