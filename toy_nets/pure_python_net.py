@@ -1,6 +1,7 @@
 import numpy
 import matplotlib.pyplot as plt
 from sklearn.datasets import load_breast_cancer
+from sklearn.metrics import roc_auc_score
 
 '''
 
@@ -25,7 +26,7 @@ Y = data.target
 print(len(Y))
 loss = []
 
-hidden_nodes_1 = 50 # Hidden layer
+hidden_nodes_1 = 100 # Hidden layer
 hidden_nodes_2 = 1 # Output layer
 numpy.random.seed()
 # Initialize weights
@@ -84,8 +85,8 @@ def backpropagation(output_1,output_2,X,Y):
 
 # Optimizer loop
 def train(X,Y,weights_1,weights_2):
-  epochs = 50
-  learning_rate = .1
+  epochs = 15
+  learning_rate = .01
   for e in range(epochs):
     # Multiply weights and data
     if(e%(epochs*.1)==0):print(e)
