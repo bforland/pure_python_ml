@@ -1,7 +1,6 @@
 import numpy
 import matplotlib.pyplot as plt
-from sklearn.datasets import load_digits
-from sklearn.metrics import auc, roc_auc_score
+from sklearn.datasets import load_breast_cancer
 
 '''
 
@@ -20,15 +19,15 @@ numpy.random.shuffle(s)
 X = X[s]
 Y = Y[s]
 '''
-digits = load_digits(n_class=2)
-X = digits.data
-Y = digits.target
+data = load_breast_cancer()
+X = data.data
+Y = data.target
 print(len(Y))
 loss = []
 
-hidden_nodes_1 = 5 # Hidden layer
+hidden_nodes_1 = 50 # Hidden layer
 hidden_nodes_2 = 1 # Output layer
-numpy.random.seed(1)
+numpy.random.seed()
 # Initialize weights
 weights_1 = numpy.random.rand(len(X[0]),hidden_nodes_1)
 weights_2 = numpy.random.rand(hidden_nodes_1,hidden_nodes_2)
@@ -63,7 +62,7 @@ def D_sigmoid(x):
   return 1-1/(1+numpy.exp(-x))
 
 def logloss(true_label, predicted_prob):
-    predicted_prob=numpy.reshape(predicted_prob,(300,))
+    predicted_prob=numpy.reshape(predicted_prob,(500,))
     for i,l in enumerate(true_label):
         if l == 1:
             predicted_prob[i] = -numpy.log(predicted_prob[i]-1e-15)
@@ -75,7 +74,7 @@ def backpropagation(output_1,output_2,X,Y):
 
   output_2_error = (Y-output_2)*D_sigmoid(output_2)
 
-  output_1_error = numpy.transpose(output_2_error).dot(numpy.transpose(weights_2))*numpy.reshape(D_sigmoid(output_1),(300,hidden_nodes_1))
+  output_1_error = numpy.transpose(output_2_error).dot(numpy.transpose(weights_2))*numpy.reshape(D_sigmoid(output_1),(500,hidden_nodes_1))
 
   d2 = output_2_error.dot(numpy.transpose(output_1))
 
@@ -85,8 +84,8 @@ def backpropagation(output_1,output_2,X,Y):
 
 # Optimizer loop
 def train(X,Y,weights_1,weights_2):
-  epochs = 11
-  learning_rate = .001
+  epochs = 50
+  learning_rate = .1
   for e in range(epochs):
     # Multiply weights and data
     if(e%(epochs*.1)==0):print(e)
@@ -101,7 +100,7 @@ def train(X,Y,weights_1,weights_2):
     # Activation function
     output_2 = sigmoid(output_2)
 
-    loss.append(numpy.mean(logloss(Y,output_2)))
+    loss.append(numpy.mean(2*(Y-output_2)**2))
 
     dW_2,dW_1 = backpropagation(output_1,output_2,X,Y)
 
@@ -126,10 +125,10 @@ def test(X,Y,weights_1,weights_2):
 
   return output_2
 
-W_1,W_2 = train(X[:300],Y[:300],weights_1,weights_2)
+W_1,W_2 = train(X[:500],Y[:500],weights_1,weights_2)
 
-Y_pred = numpy.reshape(test(X[300:len(Y)],Y[300:len(Y)],W_1,W_2),(60,))
-Y=Y[300:len(Y)]
+Y_pred = numpy.reshape(test(X[500:len(Y)],Y[500:len(Y)],W_1,W_2),(69,))
+Y=Y[500:len(Y)]
 test_auc=roc_auc_score(Y, Y_pred)
 print(test_auc)
 plt.scatter(numpy.arange(len(loss)),loss)
