@@ -9,13 +9,13 @@ from activations import sigmoid
 
 
 numpy.random.seed(0)
-X = numpy.random.rand(10,25,25)
+X = numpy.random.rand(2,25,25)
 Y = numpy.array((0,1,1,0,1,0,0,1,1,0))
 print(numpy.shape(X))
-epochs=2
+epochs=1
 for i in range(epochs):
     # Define the layers of the model
-    conv_1=convolution_2d.layer(10,filter_d=11,stride=1,padding=0)
+    conv_1=convolution_2d.layer(10,filter_d=12,stride=2,padding=12)
     output=conv_1.evaluate(X)
     print(numpy.shape(output))
 
@@ -61,7 +61,7 @@ for i in range(epochs):
     print(numpy.shape(output))
 
     #output=sigmoid.evaluate(output)
-
+    output=((1.0)*(output-numpy.min(output))/(numpy.max(output)-numpy.min(output)))
     print(output)
 
     prediction=numpy.max(output)
