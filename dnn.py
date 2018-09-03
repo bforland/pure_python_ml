@@ -29,11 +29,20 @@ def forward(X, weights_1, weights_2):
 
 '''
 
-numpy.random.seed(0)
-X = numpy.random.rand(1,3,3)
-Y = numpy.array((0,1,1,0,1,0,0,1,1,0))
-print(numpy.shape(X))
-epochs=1
+# Load the data.
+data = load_breast_cancer()
+my_data = data.data
+targets = data.target
+
+# Set the number of events.
+events = 500
+
+# Calculate the number of batches.
+n_batches = int(events / batch_size)
+
+# Build the data and the targets
+X = my_data[:events]
+Y = targets[:events]
 
 layers =[]
 
