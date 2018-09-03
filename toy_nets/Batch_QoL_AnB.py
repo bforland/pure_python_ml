@@ -38,17 +38,17 @@ class activation:
         if D is True:
             return (y - p)
 
-def normalization(data,norm_t):
-  if norm_t == 0:
-    a = -1.
-    b = 1.
+# normalization styles]
+class normalization:
+  def minmax(self,data,b=1.,a=-1.):
     return (b - a) * (data - numpy.min(data)) / (numpy.max(data) - numpy.min(data)) - a
-  elif norm_t == 1:
-    a = -1.
-    b = 1.
+  def mean(self,data,b=1.,a=-1.):
     return (b - a) * (data - numpy.mean(data)) / (numpy.max(data) - numpy.min(data)) - a
-  elif norm_t == 2:
+  def standard(self,data):
     return (data - numpy.mean(data))/numpy.std(data)
+
+# Performance of a net based off an desired AUC score
+net_performance = lambda time,auc,loss: (time+1.)**(numpy.e**((.95-auc)*10.+loss))
 
 # Forward feed on the network ---------->
 def forward(X, weights_1, weights_2):
@@ -95,7 +95,6 @@ def backwards(X, Y, final_outputs, final_inputs, hidden_outputs, hidden_inputs, 
     hidden_delta = numpy.multiply(hidden_errors,
             numpy.transpose(activation.sigmoid(hidden_inputs, True)))
 
-
     # Update the weights.
     weights_1 += lr * numpy.dot(hidden_delta.T, X)
     weights_2 += lr * numpy.dot(hidden_outputs, output_delta).T
@@ -106,23 +105,31 @@ def backwards(X, Y, final_outputs, final_inputs, hidden_outputs, hidden_inputs, 
 
 # Ask user if they would like to print
 # all the shapes.
-User_check = input("Print diagnostics (Y/n)? ")
-make_plots = input("Make plots (Y/n)? ")
-epochs = int(input("Epochs: "))
-lr = float(input("Learning Rate: "))
-batch_size = int(input("Batch size: "))
-print("Batch normalization technique? ")
-batch_norm = int(input("MinMax (0), Mean (1), Standardization (2) ? "))
+def_params = input("Run defaults? ")
 
-early_stop = input("Early stopping (Y/n)?  ")
-if early_stop == "y" or early_stop == "Y":
-  early_stop = float(input("% Loss change threshold: "))
-  early_stop = early_stop / 100.
-  tolerance = int(input("Epochs tolerance: "))
+if def_params != "y" and def_params != "Y":
+  User_check = input("Print diagnostics (Y/n)? ")
+  make_plots = input("Make plots (Y/n)? ")
+  epochs = int(input("Epochs: "))
+  lr = float(input("Learning Rate: "))
+  batch_size = int(input("Batch size: "))
+
+  early_stop = input("Early stopping (Y/n)?  ")
+  if early_stop == "y" or early_stop == "Y":
+    early_stop = float(input("% Loss change threshold: "))
+    early_stop = early_stop / 100.
+    tolerance = int(input("Epochs tolerance: "))
+  else:
+    early_stop = 0.0
+    tolerance = 0.0
 else:
+  User_check = "n"
+  make_plots = "y"
+  epochs = 20
+  lr = .1
+  batch_size = 32
   early_stop = 0.0
   tolerance = 0.0
-
 #################
 
 # Load the data.
@@ -154,7 +161,7 @@ weights_1 = numpy.random.normal(0.0, numpy.sqrt(2. / (30 + layer_1)), (layer_1, 
 weights_2 = numpy.random.normal(0.0, numpy.sqrt(2. / (layer_1 + layer_2)), (layer_2, layer_1))
 
 # List to contain loss values
-metrics = {"loss":[],"acc":[]}
+metrics = {"loss":[],"acc":[],"auc":[]}
 
 es_count = 0
 loss_temp = 0
@@ -178,7 +185,7 @@ for e in range(epochs):
         X_batch = X[b_start:b_end] # Array of batch size from training data.
 
         # Normalize the batch
-        X_batch = normalization(X_batch,batch_norm)
+        X_batch = normalization.standard(X_batch)
 
         # Send the data through the network forward -->
         final_outputs, final_inputs, hidden_outputs, hidden_inputs = forward(X_batch, weights_1, weights_2)
@@ -194,10 +201,11 @@ for e in range(epochs):
 
     metrics["loss"].append(numpy.round(numpy.mean(activation.RMS(Y[:len(outputs)], outputs, False)),4))
     metrics["acc"].append(numpy.round(numpy.mean(numpy.equal(Y[:len(outputs)],numpy.round(outputs))),4))
+    metrics["auc"].append(numpy.round(roc_auc_score(Y[:len(outputs)], outputs),4))
     if(e%(epochs*.1)==0):
-      logging.info(" Epoch: "+str(e+1)+" Loss: "+str(metrics["loss"][e])+" Acc: "+str(metrics["acc"][e])+" AUC: "+str(numpy.round(roc_auc_score(Y[:len(outputs)], outputs),4)))
+      logging.info(" Epoch: "+str(e+1)+" Loss: "+str(metrics["loss"][e])+" Acc: "+str(metrics["acc"][e])+" AUC: "+str(metrics["auc"][e]))
     if e > 0:
-      if (1. - (metrics["loss"][e]/metrics["loss"][e-1])) < early_stop:
+      if numpy.abs(1. - (metrics["loss"][e]/metrics["loss"][e-1])) < early_stop:
         if es_count < tolerance:
           es_count += 1
           loss_temp += numpy.abs(1.-(metrics["loss"][e]/metrics["loss"][e-1]))
@@ -208,14 +216,15 @@ for e in range(epochs):
       else:
         es_count = 0
         loss_temp = 0
-logging.info(" Final - Loss: "+str(metrics["loss"][len(metrics["loss"])-1])+" Acc: "+str(metrics["acc"][len(metrics["acc"])-1])+" AUC: "+str(numpy.round(roc_auc_score(Y[:len(outputs)], outputs),4)))
+logging.info(" Final - Loss: "+str(metrics["loss"][len(metrics["loss"])-1])+" Acc: "+str(metrics["acc"][len(metrics["acc"])-1])+" AUC: "+str(metrics["auc"][len(metrics["auc"])-1]))
 logging.info(" Run time: "+str(numpy.round(time.time()-t1,2)))
+logging.info(" Performance for .95 AUC Score: "+str(net_performance(time.time()-t1,metrics["auc"][len(metrics["auc"])-1],metrics["loss"][1]-metrics["loss"][len(metrics["loss"])-1])))
 diprint(numpy.shape(weights_1), User_check)
 diprint(numpy.shape(weights_2), User_check)
 
 if make_plots == "y" or make_plots == "Y":
   fig, ax1 = plt.subplots()
-  ax1.plot(numpy.arange(len(metrics["loss"])-1),minmax(metrics["loss"][1:],1.,0.),color='blue')
+  ax1.plot(numpy.arange(len(metrics["loss"])-1),normalization.minmax(metrics["loss"][1:],1.,0.),color='blue')
   ax1.set_xlabel('Epochs')
 
   ax1.set_ylabel("Loss (Normed)", color='b')

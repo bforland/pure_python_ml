@@ -7,7 +7,7 @@ class layer:
     def evaluate(self,data):
         weights=numpy.random.rand(len(data),self.nodes)
         return numpy.transpose(weights).dot(data)
-
+        
 if __name__ == '__main__':
     import numpy
     X = numpy.floor(10.0 * (numpy.random.rand(10,6,6)))
